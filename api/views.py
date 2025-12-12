@@ -8,6 +8,9 @@ from students.models import Student
 from employees.models import Employees
 from .serializers import StudentSerializer, EmployeeSerializer
 from rest_framework import mixins, generics, viewsets
+from blogs.models import Blog, Comment
+from blogs.serializers import BlogSerializer, CommentSerializer
+
 
 # Create your views here.
 @api_view(['GET','POST'])
@@ -152,33 +155,54 @@ def studentDetailView(request, pk):
 #     serializer_class = EmployeeSerializer
 #     lookup_field = 'pk'
 
-class EmployeeViewSet(viewsets.ViewSet):
-    def list(self, request):
-        queryset = Employees.objects.all()
-        serializer = EmployeeSerializer(queryset, many=True)
-        return Response(serializer.data)
+# class EmployeeViewSet(viewsets.ViewSet):
+#     def list(self, request):
+#         queryset = Employees.objects.all()
+#         serializer = EmployeeSerializer(queryset, many=True)
+#         return Response(serializer.data)
         
-    def create(self, request):
-        serializer = EmployeeSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors)
+#     def create(self, request):
+#         serializer = EmployeeSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors)
     
-    def update(self, request, pk=None):
-        employee = get_object_or_404(Employees, pk=pk) 
-        serializer = EmployeeSerializer(employee, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors)
+#     def update(self, request, pk=None):
+#         employee = get_object_or_404(Employees, pk=pk) 
+#         serializer = EmployeeSerializer(employee, data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_200_OK)
+#         return Response(serializer.errors)
 
-    def retrieve(self, request, pk=None):
-        employee = get_object_or_404(Employees, pk=pk) 
-        serializer = EmployeeSerializer(employee)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+#     def retrieve(self, request, pk=None):
+#         employee = get_object_or_404(Employees, pk=pk) 
+#         serializer = EmployeeSerializer(employee)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def delete(self, request, pk=None):
-        employee = get_object_or_404(Employees, pk=pk) 
-        employee.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+#     def delete(self, request, pk=None):
+#         employee = get_object_or_404(Employees, pk=pk) 
+#         employee.delete()
+#         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class EmployeeViewSet(viewsets.ModelViewSet):
+    queryset = Employees.objects.all()
+    serializer_class = EmployeeSerializer
+    
+
+class BlogsView(generics.ListCreateAPIView):
+    queryset = Blog.objects.all()
+    serializer_class = BlogSerializer
+
+class BlogDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Blog.objects.all()
+    serializer_class = BlogSerializer
+    
+class CommentsView(generics.ListCreateAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+
+class CommentDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
