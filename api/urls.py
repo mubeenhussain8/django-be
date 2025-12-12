@@ -21,4 +21,8 @@ urlpatterns = [
     # Comment endpoints
     path('comments/', views.CommentsView.as_view()),
     path('comments/<int:pk>/', views.CommentDetailView.as_view()),
+    
+    # Authentication endpoints
+    path('register/', views.RegisterView.as_view(), name='register'),
+    path('login/', views.LoginView.as_view(), name='login'),
 ]
