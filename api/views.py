@@ -1,8 +1,13 @@
+from django.core.serializers import serialize
+from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.views import APIView
 from students.models import Student
-from .serializers import StudentSerializer
+from employees.models import Employees
+from .serializers import StudentSerializer, EmployeeSerializer
+from rest_framework import mixins, generics, viewsets
 
 # Create your views here.
 @api_view(['GET','POST'])
@@ -39,5 +44,141 @@ def studentDetailView(request, pk):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
     elif request.method == "DELETE":
-        serializer.delete()
+        student.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# Class-based views for Employee CRUD operations using APIView
+# class EmployeeListView(APIView):
+#     """
+#     Handle GET (list) and POST (create) operations for Employees
+#     """
+#     def get(self, request):
+#         """List all employees"""
+#         employees = Employees.objects.all()
+#         serializer = EmployeeSerializer(employees, many=True)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+#     def post(self, request):
+#         """Create a new employee"""
+#         serializer = EmployeeSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# class EmployeeDetailView(APIView):
+#     """
+#     Handle GET (retrieve), PUT (update), and DELETE operations for a specific Employee
+#     """
+#     def get_object(self, pk):
+#         """Helper method to get employee object or return 404"""
+#         try:
+#             return Employees.objects.get(pk=pk)
+#         except Employees.DoesNotExist:
+#             return None
+    
+#     def get(self, request, pk):
+#         """Retrieve a specific employee"""
+#         employee = self.get_object(pk)
+#         if employee is None:
+#             return Response(status=status.HTTP_404_NOT_FOUND)
+#         serializer = EmployeeSerializer(employee)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+#     def put(self, request, pk):
+#         """Update a specific employee (full update)"""
+#         employee = self.get_object(pk)
+#         if employee is None:
+#             return Response(status=status.HTTP_404_NOT_FOUND)
+#         serializer = EmployeeSerializer(employee, data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_200_OK)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+#     def patch(self, request, pk):
+#         """Partially update a specific employee"""
+#         employee = self.get_object(pk)
+#         if employee is None:
+#             return Response(status=status.HTTP_404_NOT_FOUND)
+#         serializer = EmployeeSerializer(employee, data=request.data, partial=True)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_200_OK)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+#     def delete(self, request, pk):
+#         """Delete a specific employee"""
+#         employee = self.get_object(pk)
+#         if employee is None:
+#             return Response(status=status.HTTP_404_NOT_FOUND)
+#         employee.delete()
+#         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    
+# class EmployeeListView(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
+#     queryset = Employees.objects.all()
+#     serializer_class = EmployeeSerializer
+
+#     def get(self, request):
+#         return self.list(request)
+    
+#     def post(self, request):
+#         return self.create(request)
+    
+# class EmployeeDetailView(mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin,generics.GenericAPIView):
+#     queryset = Employees.objects.all()
+#     serializer_class = EmployeeSerializer
+    
+#     def get(self, request, pk):
+#         return self.retrieve(request, pk)
+    
+#     def put(self, request, pk):
+#         return self.update(request, pk)
+    
+#     def delete(self, request, pk):
+#         return self.destroy(request, pk)
+
+
+# class EmployeeListView(generics.ListAPIView, generics.CreateAPIView):
+#     queryset = Employees.objects.all()
+#     serializer_class = EmployeeSerializer
+    
+
+# class EmployeeDetailView(generics.RetrieveUpdateAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
+#     queryset = Employees.objects.all()
+#     serializer_class = EmployeeSerializer
+#     lookup_field = 'pk'
+
+class EmployeeViewSet(viewsets.ViewSet):
+    def list(self, request):
+        queryset = Employees.objects.all()
+        serializer = EmployeeSerializer(queryset, many=True)
+        return Response(serializer.data)
+        
+    def create(self, request):
+        serializer = EmployeeSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors)
+    
+    def update(self, request, pk=None):
+        employee = get_object_or_404(Employees, pk=pk) 
+        serializer = EmployeeSerializer(employee, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors)
+
+    def retrieve(self, request, pk=None):
+        employee = get_object_or_404(Employees, pk=pk) 
+        serializer = EmployeeSerializer(employee)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, pk=None):
+        employee = get_object_or_404(Employees, pk=pk) 
+        employee.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
